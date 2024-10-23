@@ -13,7 +13,9 @@ st.write(
 # via `st.secrets`, see https://docs.streamlit.io/develop/concepts/connections/secrets-management
 url = st.text_input("Youtube URL")
 
-tr.load_transcript(url)
+transcript = tr.load_transcript(url)
+docs_split = tr.split_text(transcript)
+retriever = tr.embed_retrieve_docs(docs_split)
 
 if not UnicodeTranslateError:
      st.info("Please enter a Youtube URL to continue.")
@@ -42,21 +44,20 @@ else:
             st.markdown(prompt)
 
         # Generate a response using the OpenAI API.
-        stream = client.chat.completions.create(
+        """stream = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {"role": m["role"], "content": m["content"]}
                 for m in st.session_state.messages
             ],
-            documents = convo_qa_chain.invoke(
+            stream=True,
+        )"""
+        convo_qa_chain.invoke(
     {
         "input": "What are autonomous agents?",
         "chat_history": [],
     }
 )
-            stream=True,
-        )
-        
         # Stream the response to the chat using `st.write_stream`, then store it in 
         # session state.
         with st.chat_message("assistant"):

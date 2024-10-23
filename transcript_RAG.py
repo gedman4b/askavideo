@@ -9,15 +9,21 @@ def load_transcript(url):
     transcript = loader.load()
     return transcript
 
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=0)
-docs_split = text_splitter.split_documents(transcript)
+def split_text(transcript):
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=0)
+    docs_split = text_splitter.split_documents(transcript)
+    return docs_split
 
-db = DocArrayInMemorySearch.from_documents(docs_split,embedding=OpenAIEmbeddings())
-retriever = db.as_retriever()
-llm = ChatOpenAI(temperature=0,model_name='gpt-4o-mini')
+def embed_retrieve_docs(docs_split):
+    db = DocArrayInMemorySearch.from_documents(docs_split,embedding=OpenAIEmbeddings())
+    retriever = db.as_retriever()
+    return retriever
+
 from langchain.chains import create_history_aware_retriever, create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
+
+llm = ChatOpenAI(temperature=0,model_name='gpt-4o-mini')
 
 condense_question_system_template = (
     "Given a chat history and the latest user question "
